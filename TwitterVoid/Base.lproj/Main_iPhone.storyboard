@@ -1,20 +1,122 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="4451" systemVersion="13A461" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="vXZ-lx-hvc">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="4510" systemVersion="12E55" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" initialViewController="vXZ-lx-hvc">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3676"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="3742"/>
     </dependencies>
     <scenes>
-        <!--class Prefix:identifier View Controller-->
+        <!--View Controller-->
         <scene sceneID="ufC-wZ-h7g">
             <objects>
                 <viewController id="vXZ-lx-hvc" customClass="TVViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="sK7-Gb-HbT"/>
+                        <viewControllerLayoutGuide type="bottom" id="nfv-vb-ann"/>
+                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="kh9-bI-dsS">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="62" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="DIX-7z-y7s">
+                                <rect key="frame" x="0.0" y="120" width="320" height="448"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <prototypes>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="TVTweetCell" rowHeight="62" id="hCA-xf-Ot1" customClass="TVTweetCell">
+                                        <rect key="frame" x="0.0" y="22" width="320" height="62"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="hCA-xf-Ot1" id="I8J-SV-6Hv">
+                                            <rect key="frame" x="0.0" y="0.0" width="320" height="61"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="z3a-fF-LOh">
+                                                    <rect key="frame" x="10" y="10" width="45" height="45"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="45" id="Dmb-c1-Fn1"/>
+                                                        <constraint firstAttribute="width" constant="45" id="Vcw-Kg-QQ4"/>
+                                                    </constraints>
+                                                </imageView>
+                                                <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" preferredMaxLayoutWidth="42" translatesAutoresizingMaskIntoConstraints="NO" id="peM-XH-BJN">
+                                                    <rect key="frame" x="65" y="10" width="42" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="peM-XH-BJN" firstAttribute="top" secondItem="I8J-SV-6Hv" secondAttribute="top" constant="10" id="81R-rS-W1S"/>
+                                                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="peM-XH-BJN" secondAttribute="trailing" constant="5" id="TSq-rV-VnC"/>
+                                                <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="z3a-fF-LOh" secondAttribute="bottom" constant="5" id="geZ-8E-7rS"/>
+                                                <constraint firstItem="z3a-fF-LOh" firstAttribute="leading" secondItem="I8J-SV-6Hv" secondAttribute="leading" constant="10" id="pUc-u1-LfO"/>
+                                                <constraint firstItem="z3a-fF-LOh" firstAttribute="top" secondItem="I8J-SV-6Hv" secondAttribute="top" constant="10" id="raH-d5-QKJ"/>
+                                                <constraint firstItem="peM-XH-BJN" firstAttribute="leading" secondItem="z3a-fF-LOh" secondAttribute="trailing" constant="10" id="z0b-vH-Nbf"/>
+                                            </constraints>
+                                        </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="tweetImageView" destination="z3a-fF-LOh" id="qUm-B9-4Q9"/>
+                                            <outlet property="tweetLabel" destination="peM-XH-BJN" id="3Dd-FR-9O5"/>
+                                        </connections>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="vXZ-lx-hvc" id="0Tf-he-VFv"/>
+                                    <outlet property="delegate" destination="vXZ-lx-hvc" id="cIA-4m-15e"/>
+                                </connections>
+                            </tableView>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="K2L-Jh-X8T">
+                                <rect key="frame" x="10" y="74" width="300" height="29"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <segments>
+                                    <segment title="Date"/>
+                                    <segment title="Alpha"/>
+                                </segments>
+                                <connections>
+                                    <action selector="sortOrderChanged:" destination="vXZ-lx-hvc" eventType="valueChanged" id="bnL-v2-PFS"/>
+                                </connections>
+                            </segmentedControl>
+                            <searchBar contentMode="redraw" translatesAutoresizingMaskIntoConstraints="NO" id="Zsn-xZ-7JE">
+                                <rect key="frame" x="0.0" y="22" width="320" height="44"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="uVR-Ri-pAf"/>
+                                </constraints>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <outlet property="delegate" destination="vXZ-lx-hvc" id="Yk1-vh-vmY"/>
+                                </connections>
+                            </searchBar>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="DIX-7z-y7s" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="0w1-jk-sYt"/>
+                            <constraint firstAttribute="trailing" secondItem="K2L-Jh-X8T" secondAttribute="trailing" constant="10" id="2RY-sZ-00q"/>
+                            <constraint firstAttribute="trailing" secondItem="DIX-7z-y7s" secondAttribute="trailing" id="B6e-rP-Tbl"/>
+                            <constraint firstItem="Zsn-xZ-7JE" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" id="EZQ-fO-D2o"/>
+                            <constraint firstItem="Zsn-xZ-7JE" firstAttribute="top" secondItem="sK7-Gb-HbT" secondAttribute="bottom" constant="2" id="FZy-YB-wFo"/>
+                            <constraint firstItem="DIX-7z-y7s" firstAttribute="top" secondItem="sK7-Gb-HbT" secondAttribute="bottom" constant="100" id="JSa-1N-a6p"/>
+                            <constraint firstAttribute="trailing" secondItem="Zsn-xZ-7JE" secondAttribute="trailing" id="NMw-uU-bFB"/>
+                            <constraint firstItem="nfv-vb-ann" firstAttribute="top" secondItem="DIX-7z-y7s" secondAttribute="bottom" id="VpN-GM-QsH"/>
+                            <constraint firstItem="K2L-Jh-X8T" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leading" constant="10" id="k4e-Iu-2Gd"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="searchBar" destination="Zsn-xZ-7JE" id="Qru-si-Hrs"/>
+                        <outlet property="searchDisplayController" destination="emb-Py-Rlj" id="0DU-XN-Wut"/>
+                        <outlet property="sortControl" destination="K2L-Jh-X8T" id="7Yz-WC-xgC"/>
+                        <outlet property="tableView" destination="DIX-7z-y7s" id="myQ-01-FQH"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="x5A-6p-PRh" sceneMemberID="firstResponder"/>
+                <searchDisplayController id="emb-Py-Rlj">
+                    <connections>
+                        <outlet property="delegate" destination="vXZ-lx-hvc" id="Waz-87-4lo"/>
+                        <outlet property="searchContentsController" destination="vXZ-lx-hvc" id="rjk-Kb-GAS"/>
+                        <outlet property="searchResultsDataSource" destination="vXZ-lx-hvc" id="M89-Qg-rzc"/>
+                        <outlet property="searchResultsDelegate" destination="vXZ-lx-hvc" id="yOF-KE-ce1"/>
+                    </connections>
+                </searchDisplayController>
             </objects>
         </scene>
     </scenes>
