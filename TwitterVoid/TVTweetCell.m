@@ -8,6 +8,7 @@
 
 #import "TVTweetCell.h"
 #import "UIImageView+WebCache.h"
+#import "EXTScope.h"
 
 @interface TVTweetCell()
 @property (weak, nonatomic) IBOutlet UIImageView *tweetImageView;
@@ -16,24 +17,16 @@
 
 @implementation TVTweetCell
 
--(NSString*)imageUrl
+-(void)awakeFromNib
 {
-    for (NSDictionary *media in  self.tweet[@"entities"][@"media"])
-    {
-        if ([media[@"type"] isEqualToString:@"photo"])
-        {
-            return media[@"media_url"];
-        }
-    }
-    return nil;
-}
+    [super awakeFromNib];
+    RAC(self, tweetLabel.text) = RACObserve(self, tweet.text);
 
-
--(void)configureCell
-{
-    self.tweetLabel.text = self.tweet[@"text"];
-    NSString *image_url = [self imageUrl];
-    [self.tweetImageView setImageWithURL:[NSURL URLWithString:image_url]];
+    @weakify(self);
+    [RACObserve(self, tweet.flickrUrl) subscribeNext:^(NSURL *url) {
+        @strongify(self);
+        [self.tweetImageView setImageWithURL:url];
+    }];
 }
 
 -(void)layoutSubviews
@@ -43,10 +36,10 @@
 }
 
 
-+(float)heightForTweet:(NSDictionary*)tweet forWidth:(float)width
++(float)heightForTweet:(TVTweet*)tweet forWidth:(float)width
 {
     CGSize constraints = CGSizeMake(width - (65+10), FLT_MAX);
-    CGSize size = [tweet[@"text"] sizeWithFont:[UIFont systemFontOfSize:17]
+    CGSize size = [tweet.text sizeWithFont:[UIFont systemFontOfSize:17]
                              constrainedToSize:constraints
                                  lineBreakMode:NSLineBreakByWordWrapping];
     size.height = ceilf(size.height + 5 + 10);

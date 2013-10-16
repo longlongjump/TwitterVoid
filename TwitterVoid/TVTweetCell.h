@@ -10,8 +10,7 @@
 
 @interface TVTweetCell : UITableViewCell
 
-@property (strong,nonatomic) NSDictionary *tweet;
+@property (strong,nonatomic) TVTweet *tweet;
 
--(void)configureCell;
-+(float)heightForTweet:(NSDictionary*)tweet forWidth:(float)width;
++(float)heightForTweet:(TVTweet*)tweet forWidth:(float)width;
 @end

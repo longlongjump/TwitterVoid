@@ -1,3 +1,6 @@
 platform :ios, '6.0'
 pod 'SDWebImage'
 pod 'SVPullToRefresh'
+pod 'FlickrKit'
+pod 'ReactiveCocoa'
+pod 'Mantle'

@@ -11,9 +11,11 @@
 #import <Accounts/Accounts.h>
 #import "TVTweetCell.h"
 #import "UIScrollView+SVInfiniteScrolling.h"
+#import "TVNetworkClient.h"
+#import "FlickrKit.h"
 
 
-static NSString *twitter_user = @"SpaceX";
+static NSString *twitter_user = @"icicorg";
 
 typedef enum{
     TVViewControllerSortOrderDate,
@@ -30,6 +32,8 @@ typedef enum{
 @property (strong,nonatomic) NSArray *tweets;
 @property (strong,nonatomic) NSArray *filteredTweets;
 @property (strong,nonatomic) NSArray *sortedTweets;
+
+@property (strong,nonatomic) NSMutableDictionary *tweetImageUrls;
 
 @property (assign,nonatomic) TVViewControllerSortOrder sortOrder;
 @end
@@ -54,7 +58,7 @@ typedef enum{
 }
 
 
--(NSDictionary*)tweetForIndexPath:(NSIndexPath*)indexPath
+-(TVTweet*)tweetForIndexPath:(NSIndexPath*)indexPath
 {
     if (self.searchBar.text.length > 0)
     {
@@ -66,7 +70,7 @@ typedef enum{
 
 -(float)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSDictionary *tweet = [self tweetForIndexPath:indexPath];
+    TVTweet *tweet = [self tweetForIndexPath:indexPath];
     return [TVTweetCell heightForTweet:tweet forWidth:self.tableView.bounds.size.width];
 }
 
@@ -79,7 +83,6 @@ typedef enum{
 {
     TVTweetCell *cell = [tableView dequeueReusableCellWithIdentifier:@"TVTweetCell"];
     cell.tweet = [self tweetForIndexPath:indexPath];
-    [cell configureCell];
     return cell;
 }
 
@@ -92,79 +95,37 @@ typedef enum{
     }];
 }
 
--(void)fetchTimeline
-{
-    NSURL *url = [NSURL URLWithString:@"https://api.twitter.com"
-                  @"/1.1/statuses/user_timeline.json"];
-    id params = @{@"screen_name" : twitter_user ,@"trim_user" : @"1"};
-    SLRequest *req = [SLRequest requestForServiceType:SLServiceTypeTwitter
-                                        requestMethod:SLRequestMethodGET
-                                                  URL:url parameters:params];
-
-    req.account = self.account;
-
-
-    [req performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
-
-        NSError *jsonError = nil;
-        NSArray *tweets = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingAllowFragments error:&jsonError];
-        dispatch_async(dispatch_get_main_queue(), ^{
-
-            self.tweets = tweets;
-            [self sortTweetsHandler:^{
-                [self addInfinieScrolling];
-                [self.tableView reloadData];
-            }];
-        });
-    }];
-}
-
 
 -(void)fetchPreviousTweets
 {
-    NSDictionary *last_tweet = self.tweets.lastObject;
-    NSNumber *last_id = last_tweet[@"id"];
-    if (last_id == nil)
-    {
-        return;
-    }
+    TVTweet *last_tweet = self.tweets.lastObject;
 
-    NSURL *url = [NSURL URLWithString:@"https://api.twitter.com"
-                  @"/1.1/statuses/user_timeline.json"];
-    id params = @{@"screen_name" : twitter_user ,@"trim_user" : @"1", @"max_id": last_id.stringValue};
-    SLRequest *req = [SLRequest requestForServiceType:SLServiceTypeTwitter
-                                        requestMethod:SLRequestMethodGET
-                                                  URL:url parameters:params];
+    RACSignal *signal = [TVNetworkClient.shared fetchTweetsParams:@{@"screen_name" : twitter_user ,@"trim_user" : @"1", @"max_id": last_tweet.tweetId.stringValue}];
 
-    req.account = self.account;
+    [signal subscribeNext:^(NSArray *tweets) {
+        [self.tableView.infiniteScrollingView stopAnimating];
+        self.tableView.infiniteScrollingView.enabled = tweets.count > 0;
+        self.tweets = [self.tweets arrayByAddingObjectsFromArray:tweets];
+        [self sortTweetsHandler:^{
+            [self.tableView reloadData];
+        }];
 
-    [req performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
-
-        NSError *jsonError = nil;
-        NSArray *tweets = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingAllowFragments error:&jsonError];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSDictionary *last_tweet = self.tweets.lastObject;
-            NSString *current_last_id = last_tweet[@"id"];
-            if (![current_last_id isEqual:last_id] )
-            {
-                return; // seems it is alread loaded
-            }
-
-            if (tweets.count <= 1)
-            {
-                self.tableView.infiniteScrollingView.enabled = NO;
-                return;
-            }
-
-            self.tweets = [self.tweets arrayByAddingObjectsFromArray:[tweets subarrayWithRange:NSMakeRange(1, tweets.count - 1)]];
-            [self sortTweetsHandler:^{
-                [self.tableView.infiniteScrollingView stopAnimating];
-                [self.tableView reloadData];
-            }];
-        });
     }];
 }
 
+
+-(void)fetchTweets
+{
+    RACSignal *sig = [TVNetworkClient.shared fetchTweetsParams:@{@"screen_name" : twitter_user ,@"trim_user" : @"1"}];
+
+    [sig subscribeNext:^(id x) {
+        self.tweets = x;
+        [self sortTweetsHandler:^{
+            [self.tableView reloadData];
+            [self addInfinieScrolling];
+        }];
+    }];
+}
 
 -(void)requestAccess
 {
@@ -187,29 +148,17 @@ typedef enum{
             }
 
             self.account = account;
-            
-            [self fetchTimeline];
+
+            TVNetworkClient.shared.twitterAccount = account;
+
+            [self fetchTweets];
         });
     }];
 }
 
+
 -(void)sortTweetsHandler:(void(^)())handler
 {
-    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setDateFormat:@"EEE LLL d HH:mm:ss Z yyyy"];
-    [formatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US"]];
-
-    NSComparisonResult(^date_comparator)(id obj1, id obj2) = ^(NSDictionary *tweet1, NSDictionary *tweet2){
-        NSDate *date1 = [formatter dateFromString:tweet1[@"created_at"]];
-        NSDate *date2 = [formatter dateFromString:tweet2[@"created_at"]];
-        return -[date1 compare:date2];
-    };
-
-
-    NSComparisonResult(^alpha_comparator)(id obj1, id obj2) = ^(NSDictionary *tweet1, NSDictionary *tweet2) {
-        return [[tweet1[@"text"] substringToIndex:1] compare:[tweet2[@"text"] substringToIndex:1]];
-    };
-
     TVViewControllerSortOrder order = self.sortOrder;
     NSArray *tweets_list = self.tweets;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
@@ -217,10 +166,10 @@ typedef enum{
         NSArray *res = nil;
         if (order == TVViewControllerSortOrderAlpha)
         {
-            res = [tweets_list sortedArrayUsingComparator:alpha_comparator];
+            res = [TVTweet sortedByApha:tweets_list];
         } else
         {
-            res = [tweets_list sortedArrayUsingComparator:date_comparator];
+            res = [TVTweet sortedByDate:tweets_list];
         }
 
 
@@ -252,17 +201,10 @@ typedef enum{
     }
 
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        NSMutableArray *res = [NSMutableArray array];
 
-
-        for (NSDictionary *tweet in tweets_list)
-        {
-            NSString *tweet_text = [tweet[@"text"] lowercaseString];
-            if ([tweet_text rangeOfString:search_term].location != NSNotFound)
-            {
-                [res addObject:tweet];
-            }
-        }
+        NSArray *res = [tweets_list filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(TVTweet *tweet, NSDictionary *b) {
+            return [tweet.text.lowercaseString rangeOfString:search_term].location != NSNotFound;
+        }]];
 
         dispatch_async(dispatch_get_main_queue(), ^{
             self.filteredTweets = res;

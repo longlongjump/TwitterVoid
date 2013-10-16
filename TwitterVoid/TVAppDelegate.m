@@ -7,11 +7,13 @@
 //
 
 #import "TVAppDelegate.h"
+#import "FlickrKit.h"
 
 @implementation TVAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    [[FlickrKit sharedFlickrKit] initializeWithAPIKey:@"f0c022cc2099e77c27060db036c58afd" sharedSecret:@"e8c5738260fe9f4a"];
     // Override point for customization after application launch.
     return YES;
 }
